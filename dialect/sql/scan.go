@@ -190,6 +190,19 @@ func assignable(typ reflect.Type) bool {
 	return true
 }
 
+func camel2Case(n string) string {
+	// helloWorld => hello_world
+	var v []rune
+	for _, s := range n {
+		if s >= 'A' && s <= 'Z' {
+			v = append(v, '_', s+32)
+			continue
+		}
+		v = append(v, s)
+	}
+	return string(v)
+}
+
 // scanStruct returns the configuration for scanning a sql.Row into a struct.
 func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 	var (
@@ -221,6 +234,8 @@ func scanStruct(typ reflect.Type, columns []string) (*rowScan, error) {
 			idx = names[name]
 		case names[strings.ToLower(name)] != nil:
 			idx = names[strings.ToLower(name)]
+		case names[camel2Case(name)] != nil:
+			idx = names[camel2Case(name)]
 		default:
 			return nil, fmt.Errorf("sql/scan: missing struct field for column: %s (%s)", c, name)
 		}
